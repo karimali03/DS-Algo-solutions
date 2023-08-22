@@ -19,7 +19,7 @@ class Solution {
 public:
     int sumOfLeftLeaves(TreeNode* root) {
         if(!root) return 0;
-        if(leaf(root->left)) return root->left->val +           sumOfLeftLeaves(root->right);
+        if(leaf(root->left)) return root->left->val +sumOfLeftLeaves(root->right);
         return sumOfLeftLeaves(root->left)+sumOfLeftLeaves(root->right);
     }
 };
