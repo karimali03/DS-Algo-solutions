@@ -54,7 +54,7 @@ struct BinaryTree {
    
 };
 
-// o(1) memeory solution 
+// o(h) memeory solution 
 class Solution {
 public:
     TreeNode* a={};
