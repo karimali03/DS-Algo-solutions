@@ -153,25 +153,28 @@ void delete_front(){
         delete_node(d);
     }
 }
-void link_2(Node* one,Node* two){
-	if(!one){
-		head=two;
-	}
+
+void deleteNext(Node* cur){
+	Node* del=cur->next;
+	cur->next=cur->next->next;
+	delete del;
+	length--;
+	if(!cur->next) tail=cur;
+}
+
+void deleteWithKey(int val){
+	if(!head) return;
+	if(head->data==val) delete_front();
 	else{
-		one->next=two;
+		for(Node *cur=head,*prv=nullptr ; cur ; prv=cur, cur=cur->next){
+			if(cur->data==val){
+				deleteNext(prv);
+				return;
+			}
+		}
 	}
-	if(!two) tail=one;
 }
-void delete_key(int val){
-    Node* prev=nullptr;
-    for(auto cur=head;cur;prev=cur,cur=cur->next){
-        if(cur->data==val){
-			link_2(prev,cur->next);
-			delete_node(cur);
-            return;
-        }
-    }
-}
+
 
 };
 
@@ -184,8 +187,8 @@ void test1() {
     list.insert_front(4);
     list.insert_front(5);
 	list.print();
-    list.delete_key(5);
-	 list.delete_key(1);
+    list.deleteWithKey(5);
+	 list.deleteWithKey(1);
 	list.print();
 }
 

@@ -41,7 +41,7 @@ public:
             n->next=head;
             head=n;
         }
-
+        
     }
     void print(){
         for(node *cur=head;cur;cur=cur->next){

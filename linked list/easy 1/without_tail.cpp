@@ -31,8 +31,8 @@ public:
         Node* n=new Node(val);
          if(!head) head=n;
          else{
-           head=head->next;
-           head=n;
+          n->next=head;
+		  head=n;
         }
     }
     Node* get_tail(){

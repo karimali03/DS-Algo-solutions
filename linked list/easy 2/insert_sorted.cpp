@@ -163,25 +163,24 @@ void link_2(Node* one,Node* two){
 	if(!two) tail=one;
 }
 
-void insert_between(Node* prev,int val){
+void insertNext(Node* prev,int val){
 	if(!prev) insert_front(val);
-    Node* node=new Node(val);
+    Node* node = new Node(val);
 	add_node(node);
     node->next=prev->next;
     prev->next=node;
-
+	if(!node->next) tail=node;
 }
+
 void insert_sorted(int val){
-    if(!head) {
-        insert_front(val);
-        return;   }
+
     if(val>=tail->data) insert_end(val);
-    else if(val<=head->data) insert_front(val);
+    else if(!head || val<=head->data) insert_front(val);
     else{
         Node* prev=nullptr;
         for(auto cur=head;cur;prev=cur,cur=cur->next){
             if(val<=cur->data){
-                insert_between(prev,val);
+                insertNext(prev,val);
                 return;
             }
         }

@@ -153,26 +153,22 @@ void delete_front(){
         delete_node(d);
     }
 }
-void link_2(Node* one,Node* two){
-	if(!one){
-		head=two;
-	}
-	else{
-		one->next=two;
-	}
-	if(!two) tail=one;
-}
-void delete_even(){
-    if(length<=1) return;
-	Node* prev=head;
-	for(auto cur=head->next;cur;){
-		Node* del=cur;
-		link_2(prev,cur->next);
-		delete del;
-		if(prev->next==nullptr) break;
-		cur=prev->next->next;
-		prev=prev->next;
 
+void deleteNext(Node* prev){
+	Node* del=prev->next;
+	prev->next=prev->next->next;
+	delete del; length--;
+	if(!prev->next) tail=prev;
+}
+
+
+void delete_even(){
+    if(!head || head==tail) return;
+	for(auto cur=head->next,prv=head;cur;){
+		deleteNext(prv);
+		if(!prv->next) break;  
+		cur=prv->next->next;
+		prv=prv->next;
 	}
 }
 
