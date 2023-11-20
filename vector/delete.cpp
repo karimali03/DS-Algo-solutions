@@ -74,8 +74,8 @@ public:
 	}
     
     int pop(int idx){
+		assert(0 <= idx && idx < size);
 		int val=arr[idx];
-        assert(0 <= idx && idx < size);
         for(int i=idx;i<size-1;i++) arr[i]=arr[i+1];
         size--;
 		return val;
