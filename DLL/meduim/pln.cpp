@@ -147,18 +147,16 @@ public:
 		}
 		
 	}
-  void del_even(){
-    if(length<=1) return;
-    for(auto cur=head->next;cur;){
-        cur=delete_and_link(cur);
-        if(!cur->next) {
-            tail=cur;
-            return;
+    bool pln(){
+        auto l=head,r=tail;
+        while(l!=r){
+            if(l->data!=r->data) return false;
+			cout<<l<<" "<<r<<"\n";
+            l=l->next;
+            r=r->prev;
         }
-        cur=cur->next->next;
+        return true;
     }
-  }
-
 };
 
 void test1() {
@@ -166,14 +164,10 @@ void test1() {
 	LinkedList list;
 
 	list.insert_end(1);
-	list.insert_end(2);
-	list.insert_end(3);
-    list.insert_end(4);
-	list.insert_end(5);
-    list.insert_end(6);
-    list.del_even();
+	list.insert_end(1);
+	list.insert_end(1);
+    cout<<list.pln()<<"\n";
 	list.print();
-    list.print_reversed();
 
 }
 
