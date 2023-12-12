@@ -1,6 +1,7 @@
 #include<iostream>
 #include<cstring>	// memset
 #include<map>
+#include<vector>
 using namespace std;
 
 class  trie
@@ -41,21 +42,27 @@ public:
         }
         return true;
 	}
+    void get_all_strings(vector<string> & res ,string s=""){
+        if(isLeaf) res.push_back(s);
+        for(auto & x : child){
+            x.second->get_all_strings(res,s+x.first);
+        }
+    }
 };
 
 int main() {
-	trie root;
+	trie tree;
 
-	root.insert("abcd");
-	root.insert("xyz");
-	root.insert("abf");
-	root.insert("xn");
-	root.insert("ab");
-	root.insert("bcd");
+    tree.insert("abcd");
+	tree.insert("xyz");
+	tree.insert("a");
+	tree.insert("ab");
+	tree.insert("xyzw");
+	tree.insert("bcd");
 
-	cout << root.word_exist("xyz") << "\n";
-	cout << root.word_exist("xy") << "\n";
-	cout << root.prefix_exist("xy") << "\n";
-   
+	vector<string> res;
+	tree.get_all_strings(res);
+	for (int i = 0; i < (int) res.size(); ++i)
+		cout << res[i] << "\n";
 	return 0;
 }
