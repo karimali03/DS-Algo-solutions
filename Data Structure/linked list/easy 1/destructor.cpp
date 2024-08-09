@@ -58,7 +58,7 @@ public:
     void insert_front(int val){
         if(head == nullptr) head = tail = add(val);
         else{
-            auto nxt = head;
+            auto nxt = head->next;
             head = add(val);
             head->next = nxt;
         }
@@ -142,43 +142,18 @@ public:
         return -1;
     }
 
-	bool is_same(linked_list & list){
-		if(len != list.len) return false;
-		for(auto cur1 = head , cur2 = list.head ; cur1 ; cur1 = cur1->next , cur2 = cur2->next ){
-			if(cur1->val != cur2->val) return false;
-		}
-		return true;
-	}
 
 };
 
 
-
-
-void test1() {
-	linked_list list1;
-	linked_list list2;
-
-	assert(list1.is_same(list2));
-	list1.insert_back(6);
-	list1.insert_back(10);
-	list2.insert_back(6);
-	assert(!list1.is_same(list2));
-	list2.insert_back(10);
-	assert(list1.is_same(list2));
-	list1.insert_back(8);
-	list1.insert_back(15);
-	list2.insert_back(8);
-	list2.insert_back(77);
-	assert(!list1.is_same(list2));
-}
-
-
 int main() {
-	test1();
-	
-	// must see it, otherwise RTE
-	cout << "\n\nNO RTE\n";
+
+	linked_list list;
+	list.insert_back(6);
+	list.insert_back(10);
+	list.insert_back(8);
+	list.insert_back(15);
+	list.print();
 
 	return 0;
 }

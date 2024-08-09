@@ -1,210 +1,148 @@
 #include <iostream>
-#include <cassert>
-#include <climits>
-#include <vector>		// for debug
-#include <algorithm>
-#include <sstream>
+#include <assert.h>
 using namespace std;
 
-struct Node {
-	int data { };
-	Node* next { };
-	Node(int data) : data(data) {}
-	~Node() {
-		cout << "Destroy value: " << data <<" at address "<< this<< "\n";
-	}
-};
 
-class LinkedList {
+class linked_list
+
+{
 private:
-	Node *head { };
-	Node *tail { };
-	int length = 0;	// let's maintain how many nodes
+    struct Node
+    {
+        int val;
+        Node* next;
+        Node(int val):val(val){ next = nullptr;};
+    };
+    Node* head;
+    Node* tail;
+    int len;
 
-	vector<Node*> debug_data;	// add/remove nodes you use
-
-	void debug_add_node(Node* node) {
-		debug_data.push_back(node);
-	}
-	void debug_remove_node(Node* node) {
-		auto it =find(debug_data.begin(), debug_data.end(), node);
-		if (it == debug_data.end())
-			cout << "Node does not exist\n";
-		else
-			debug_data.erase(it);
-	}
-
+    Node* add(int val){
+        len++;
+		auto node = new Node(val);
+        return node;
+    }
+    
+    void del(Node* node){
+        len--;
+        delete node;
+    }
+    
 public:
+    linked_list(){
+        head = tail = nullptr;
+        len = 0;
+    };
 
-	// Below 2 deletes prevent copy and assign to avoid this mistake
-	LinkedList() {
-	}
-	LinkedList(const LinkedList&) = delete;
-	LinkedList &operator=(const LinkedList &another) = delete;
-
-	void debug_print_address() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << cur << "," << cur->data << "\t";
-		cout << "\n";
-	}
-
-	void debug_print_node(Node* node, bool is_seperate = false) {
-		if (is_seperate)
-			cout << "Sep: ";
-		if (node == nullptr) {
-			cout << "nullptr\n";
-			return;
+	~linked_list() {		
+		while(head){
+			Node* nxt = head->next;
+			del(head);
+			head = nxt;
 		}
-		cout << node->data << " ";
-		if (node->next == nullptr)
-			cout << "X ";
-		else
-			cout << node->next->data << " ";
-
-		if (node == head)
-			cout << "head\n";
-		else if (node == tail)
-			cout << "tail\n";
-		else
-			cout << "\n";
 	}
-	void debug_print_list(string msg = "") {
-		if (msg != "")
-			cout << msg << "\n";
-		for (int i = 0; i < (int) debug_data.size(); ++i)
-			debug_print_node(debug_data[i]);
-		cout << "************\n"<<flush;
-	}
+   
 
-
-	void debug_verify_data_integrity() {
-		if (length == 0) {
-			assert(head == nullptr);
-			assert(tail == nullptr);
-		} else {
-			assert(head != nullptr);
-			assert(tail != nullptr);
-			if (length == 1)
-				assert(head == tail);
-			else
-				assert(head != tail);
-			assert(!tail->next);
+  
+    void insert(int val){
+        if(head == nullptr){
+            head = tail = add(val);
+        }
+		else if(val <= head->val){
+			auto nxt = head;
+			head = add(val);
+			head->next = nxt;
 		}
-		int len = 0;
-		for (Node* cur = head; cur; cur = cur->next, len++)
-			assert(len < 10000);	// Consider infinite cycle?
-		assert(length == len);
-		assert(length == (int)debug_data.size());
-	}
-
-	////////////////////////////////////////////////////////////
-
-	void print() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << cur->data << " ";
-		cout << "\n";
-	}
-
-	// These 2 simple functions just to not forget changing the vector and length
-	void delete_node(Node* node) {
-		debug_remove_node(node);
-		--length;
-		delete node;
-	}
-
-	void add_node(Node* node) {
-		debug_add_node(node);
-		++length;
-	}
-
-	void insert_end(int value) {
-		Node* item = new Node(value);
-		add_node(item);
-
-		if (!head)
-			head = tail = item;
-		else
-			tail->next = item, tail = item;
-	}
-	void insert_front(int value) {		
-		Node* item = new Node(value);
-		add_node(item);
-
-		item->next = head;
-		head = item;
-
-		if(length == 1)
-			tail = head;
-
-		debug_verify_data_integrity();
-	}
-
-void delete_front(){
-    if(!head){
-        head=tail=nullptr;
-    }
-    else if(head==tail){
-        delete_node(head);
-        head=tail=nullptr;
-    }
-    else{
-        Node* d=head;
-        head=head->next;
-        delete_node(d);
-    }
-}
-void link_2(Node* one,Node* two){
-	if(!one){
-		head=two;
-	}
-	else{
-		one->next=two;
-	}
-	if(!two) tail=one;
-}
-
-void insertNext(Node* prev,int val){
-	if(!prev) insert_front(val);
-    Node* node = new Node(val);
-	add_node(node);
-    node->next=prev->next;
-    prev->next=node;
-	if(!node->next) tail=node;
-}
-
-void insert_sorted(int val){
-
-    if(val>=tail->data) insert_end(val);
-    else if(!head || val<=head->data) insert_front(val);
-    else{
-        Node* prev=nullptr;
-        for(auto cur=head;cur;prev=cur,cur=cur->next){
-            if(val<=cur->data){
-                insertNext(prev,val);
-                return;
-            }
+        else{
+            for(Node* cur = head , *prv = nullptr ; cur ; prv = cur ,cur = cur->next){
+				if(cur->val >= val){
+						prv->next = add(val);
+						prv->next->next = cur;
+						return;
+				}
+			}
+			tail->next = add(val);
+			tail = tail->next;
         }
     }
-}
+    
+    Node* get_nth(int nth){
+        /* nth form 1 to len */
+        assert(nth > 0 && nth <= len);
+        for(auto cur = head ; cur ; cur = cur->next){
+            if(nth == 1) return cur;
+            nth--;
+        }
+        return {};
+    }
+
+    void del_first(){
+        assert(head);
+        auto node = head;
+        if(head == tail) head = tail = nullptr;
+        else head = head->next;
+        del(node);
+    }
+
+    void del_back(){
+        assert(head);
+        auto node = tail;
+        if(head == tail) head = tail = nullptr;
+        else {
+            auto cur = get_nth(len  - 1);
+            tail = cur;
+            cur -> next = nullptr;
+        }
+        del(node);
+    }
+
+	void print(){
+		for(auto cur = head ; cur ; cur = cur->next){
+			cout<<cur->val<<" ";
+		}
+		cout<<"\n";
+	}
+
+    
+
+
 
 };
 
+
+/*
+	Implement: void insert_sorted(int value)
+	It will always insert the value in position so that list is sorted
+	Let’s insert values: 10 2 30 4 1
+	insert(10) ⇒ {10}
+	insert(2) ⇒ {2, 10}
+	insert(30) ⇒ {2, 10, 30}
+	insert(4) ⇒ {2, 4, 10, 30}
+	insert(1) ⇒ {1, 2, 4, 10, 30}
+*/
+
+
 void test1() {
-	cout << "\n\ntest1\n";
-	LinkedList list;
-    list.insert_sorted(1);
-    list.insert_sorted(5);
-    list.insert_sorted(4);
-    list.insert_sorted(7);
-    list.insert_sorted(77);
-    list.insert_sorted(2);
+	cout << "test1\n";
+	linked_list list;
+
+	list.insert(10);
+	list.insert(2);
+	list.insert(30);
+	list.insert(4);
+	list.insert(1);
+
+	// some actions
 	list.print();
+
+	string expected = "2 4 10 30";
+	cout<<expected<<"\n********\n";
 }
 
-int main() {
-	 test1();
-	// must see it, otherwise RTE
-	cout << "\n\nNO RTE\n";
 
+int main() {
+	test1();
+
+	cout << "bye\n";		// must see it, otherwise RTE
 	return 0;
 }

@@ -1,133 +1,276 @@
 #include <iostream>
-#include <cassert>
-#include <climits>
-#include <vector>		// for debug
-#include <algorithm>
-#include <sstream>
+#include <assert.h>
 #include <unordered_set>
 using namespace std;
 
-struct Node {
-	int data { };
-	Node* next { };
-	Node(int data) : data(data) {}
-	~Node() {
-		cout << "Destroy value: " << data <<" at address "<< this<< "\n";
-	}
-};
 
-class LinkedList {
+class linked_list
+
+{
 private:
-	Node* head { };
-	Node* tail { };
-	int length = 0;	// let's maintain how many nodes
+    struct Node
+    {
+        int val;
+        Node* next;
+        Node(int val):val(val){ next = nullptr;};
+    };
+    Node* head;
+    Node* tail;
+    int len;
 
-	vector<Node*> debug_data;	// add/remove nodes you use
-
-	void debug_add_node(Node* node) {
-		debug_data.push_back(node);
-	}
-	void debug_remove_node(Node* node) {
-		auto it =find(debug_data.begin(), debug_data.end(), node);
-		if (it == debug_data.end())
-			cout << "Node does not exist\n";
-		else
-			debug_data.erase(it);
-	}
-
+    Node* add(int val){
+        len++;
+		auto node = new Node(val);
+        return node;
+    }
+    
+    void del(Node* node){
+        len--;
+        delete node;
+    }
+    
 public:
+    linked_list(){
+        head = tail = nullptr;
+        len = 0;
+    };
 
-	// Below 2 deletes prevent copy and assign to avoid this mistake
-	LinkedList() {
-	}
-	  LinkedList(const LinkedList&) = delete;
-	  LinkedList &operator=(const LinkedList &another) = delete;
-
-	void debug_print_address() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << cur << "," << cur->data << "\t";
-		cout << "\n";
-	}
-
-	void print() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << "address: "<<cur<<" Data: "<<cur->data << "\n";
-		cout << "\n";
-	}
-
-	// These 2 simple functions just to not forget changing the vector and length
-	void delete_node(Node* node) {
-		debug_remove_node(node);
-		--length;
-		delete node;
-	}
-
-	void add_node(Node* node) {
-		debug_add_node(node);
-		++length;
-	}
-
-	void insert_end(int value) {
-		Node* item = new Node(value);
-		add_node(item);
-
-		if (!head)
-			head = tail = item;
-		else
-			tail->next = item, tail = item;
-	}
-	void insert_front(int value) {		
-		Node* item = new Node(value);
-		add_node(item);
-
-		item->next = head;
-		head = item;
-
-		if(length == 1) tail = head;
-
-	}
-	void deleteNext(Node *prv){
-		Node* del=prv->next;
-		prv->next=prv->next->next;
-		delete del; length--;
-		if(!prv->next) tail=prv;
-	}
-	void removeDuplicate(){
-		if(!head || head==tail) return;
-		unordered_set<int>st;
-		for(Node *cur=head,*prv=nullptr;cur;){
-			if(st.count(cur->data)){
-				deleteNext(prv);
-				cur=prv->next;
-			}
-			else{
-				st.insert(cur->data);
-				prv=cur;
-				cur=cur->next;
-			}
+	~linked_list() {		
+		while(head){
+			Node* nxt = head->next;
+			del(head);
+			head = nxt;
 		}
 	}
+   
+
+  
+
+    void insert_back(int val){
+        if(head == nullptr){
+            head = tail = add(val);
+        }
+        else{
+            tail->next = add(val);
+            tail = tail->next;
+        }
+    }
+    
+    void insert_front(int val){
+        if(head == nullptr) head = tail = add(val);
+        else{
+            auto nxt = head;
+            head = add(val);
+            head->next = nxt;
+        }
+    }
+
+    void insert(int idx , int val){
+        assert(idx >= 0 && idx <= len);
+        if(idx == len) insert_back(val);
+        else if(idx == 0) insert_front(val);
+        else{
+            for(auto cur = head ; cur ; cur = cur->next){
+                if(idx == 1){
+                    auto nxt = cur->next;
+                    cur -> next = add(val);
+                    cur -> next -> next = nxt;
+                    return; 
+                }
+                idx--;
+            }
+        }
+    }
+
+    Node* get_nth(int nth){
+        /* nth form 1 to len */
+        assert(nth > 0 && nth <= len);
+        for(auto cur = head ; cur ; cur = cur->next){
+            if(nth == 1) return cur;
+            nth--;
+        }
+        return {};
+    }
+
+    void del_first(){
+        assert(head);
+        auto node = head;
+        if(head == tail) head = tail = nullptr;
+        else head = head->next;
+        del(node);
+    }
+
+    void del_back(){
+        assert(head);
+        auto node = tail;
+        if(head == tail) head = tail = nullptr;
+        else {
+            auto cur = get_nth(len  - 1);
+            tail = cur;
+            cur -> next = nullptr;
+        }
+        del(node);
+    }
+
+    void del(int idx){
+        assert(idx >= 0 && idx < len);
+        if(idx == 0) del_first();
+        else if(idx == len-1) del_back();
+        else{
+            auto cur = get_nth(idx);
+            auto node = cur->next;
+            cur->next = cur-> next -> next;
+            del(node);
+        }
+    }
+
+
+
+    void print(){
+        for(auto cur = head ; cur ; cur = cur->next){
+            cout<<cur->val<<" ";
+        }
+        cout<<"\n";
+    }
+
+    int search(int val){
+         int idx = 0;
+         for(auto cur = head ; cur ; cur = cur->next){
+            if(val == cur->val){
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
+
+	bool is_same(linked_list & list){
+		if(len != list.len) return false;
+		for(auto cur1 = head , cur2 = list.head ; cur1 ; cur1 = cur1->next , cur2 = cur2->next ){
+			if(cur1->val != cur2->val) return false;
+		}
+		return true;
+	}
+
+    Node* get_nth_back(int nth){
+        assert(nth >= 1 && nth <= len);
+        return get_nth(len - nth + 1);
+    }
+
+	void reverse(){
+		if(!head || head == tail) return;
+
+		auto prev = head;
+		auto cur = head->next;
+
+		while (cur)
+		{
+			auto nxt = cur->next;
+			cur->next = prev;
+			prev = cur;
+			cur = nxt;
+		}
+
+		tail = head; tail->next = nullptr;
+		head = prev;
+		
+	}
+
+	void del_next(Node* node){
+		if(node == tail) return;
+
+		Node* del_node = node->next;
+		node->next = node->next->next;
+		if(!node->next) tail = node;
+		del(del_node);
+
+	}
+	void remove_duplicates(){
+		if(!head || head == tail) return;
+		unordered_set<int>st;
+		for(Node *cur = head , *prv = nullptr ; cur ; prv = cur ,cur = cur->next){
+			if(st.count(cur->val)){
+				del_next(prv);
+				cur = prv;
+			}
+			st.insert(cur->val);
+		}
+		
+	}
 
 };
 
+
+
 void test1() {
-	cout << "\n\ntest1\n";
-	LinkedList list;
-    list.insert_front(1);
-    list.insert_front(1);
-    list.insert_front(1);
-    list.insert_front(1);
-    list.insert_front(1);
+	cout<<"test1\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.remove_duplicates();
 	list.print();
-	list.removeDuplicate();
-    list.print();
-    
+
+	string expected = "1 2 3";
+	cout<<expected<<"\n********\n";
+}
+
+void test2() {
+	cout<<"test2\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.insert_back(2);
+	list.remove_duplicates();
+	list.print();
+
+	string expected = "1 2 3";
+	cout<<expected<<"\n********\n";
+}
+
+void test3() {
+	cout<<"test3\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.insert_back(3);
+	list.insert_back(3);
+	list.remove_duplicates();
+	list.print();
+
+	string expected = "1 2 3";
+	cout<<expected<<"\n********\n";
+}
+
+void test4() {
+	cout<<"test4\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(2);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.remove_duplicates();
+	list.print();
+
+	string expected = "1 2 3";
+	cout<<expected<<"\n********\n";
 }
 
 int main() {
-	 test1();
-	// must see it, otherwise RTE
-	cout << "\n\nNO RTE\n";
+	test1();
+	test2();
+	test3();
+	test4();
 
+	// must see it, otherwise RTE
+		cout << "\n\nNO RTE\n";
 	return 0;
 }

@@ -44,27 +44,21 @@ public:
     }
 };
 
-void test1() {
-	cout << "\n\ntest1\n";
-	LinkedList list;
-
-	
-
-}
-
-void test2() {
-	cout << "\n\ntest2\n";
-	LinkedList list;
-    
-}
 
 
 int main() {
-	test1();
-	test2();
 
-	// must see it, otherwise RTE
-	cout << "\n\nNO RTE\n";
+	LinkedList list;
+
+	list.insert(10);
+	list.insert(20);
+	list.insert(30);
+	list.insert(40);
+	list.insert(50);
+	list.insert(60);
+
+	list.print();	// 60 50 40 30 20 10
+	cout<<list.get_tail()->data;	// 10
 
 	return 0;
 }

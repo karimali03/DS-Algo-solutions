@@ -142,41 +142,76 @@ public:
         return -1;
     }
 
-	bool is_same(linked_list & list){
-		if(len != list.len) return false;
-		for(auto cur1 = head , cur2 = list.head ; cur1 ; cur1 = cur1->next , cur2 = cur2->next ){
-			if(cur1->val != cur2->val) return false;
-		}
-		return true;
-	}
 
 };
 
-
-
-
 void test1() {
-	linked_list list1;
-	linked_list list2;
+	cout << "\n\ntest1\n";
+	linked_list list;
 
-	assert(list1.is_same(list2));
-	list1.insert_back(6);
-	list1.insert_back(10);
-	list2.insert_back(6);
-	assert(!list1.is_same(list2));
-	list2.insert_back(10);
-	assert(list1.is_same(list2));
-	list1.insert_back(8);
-	list1.insert_back(15);
-	list2.insert_back(8);
-	list2.insert_back(77);
-	assert(!list1.is_same(list2));
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.del_first();
+	// some actions
+	list.print();
+
+	string expected = "2 3";
+	cout<<expected<<"\n******\n";
+
 }
 
+void test2() {
+	cout << "\n\ntest2\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.del_first();
+	list.insert_back(3);
+	list.insert_back(4);
+	list.del_first();
+	list.print();
+
+	string expected = "3 4";
+	cout<<expected<<"\n********\n";
+
+}
+
+void test3() {
+	cout << "\n\ntest3\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.del_first();
+	list.del_first();
+	list.print();
+
+	string expected = "";
+	cout<<expected<<"\n****\n";
+}
+
+void test4() {
+	cout << "\n\ntest4\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.del_first();
+	list.print();
+
+	string expected = "2";
+	cout<<expected<<"\n*******\n";
+	
+}
 
 int main() {
 	test1();
-	
+	test2();
+	test3();
+	test4();
+
 	// must see it, otherwise RTE
 	cout << "\n\nNO RTE\n";
 

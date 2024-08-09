@@ -88,6 +88,7 @@ public:
             if(nth == 1) return cur;
             nth--;
         }
+        return {};
     }
 
     void del_first(){
@@ -150,27 +151,25 @@ public:
 		return true;
 	}
 
+    Node* get_nth_back(int nth){
+        assert(nth >= 1 && nth <= len);
+        return get_nth(len - nth + 1);
+    }
+
 };
 
 
 
-
 void test1() {
-	linked_list list1;
-	linked_list list2;
+	cout << "\n\ntest1\n";
+	linked_list list;
 
-	assert(list1.is_same(list2));
-	list1.insert_back(6);
-	list1.insert_back(10);
-	list2.insert_back(6);
-	assert(!list1.is_same(list2));
-	list2.insert_back(10);
-	assert(list1.is_same(list2));
-	list1.insert_back(8);
-	list1.insert_back(15);
-	list2.insert_back(8);
-	list2.insert_back(77);
-	assert(!list1.is_same(list2));
+	list.insert_back(1);
+	assert(list.get_nth_back(1)->val == 1);
+	list.insert_back(2);
+	list.insert_back(3);
+	assert(list.get_nth_back(1)->val == 3);
+	assert(list.get_nth_back(3)->val == 1);
 }
 
 
