@@ -1,180 +1,287 @@
 #include <iostream>
-#include <cassert>
-#include <climits>
-#include <vector>		// for debug
-#include <algorithm>
-#include <sstream>
+#include <assert.h>
 using namespace std;
 
-struct Node {
-	int data { };
-	Node* next { };
-	Node(int data) : data(data) {}
-	~Node() {
-		cout << "Destroy value: " << data <<" at address "<< this<< "\n";
-	}
-};
 
-class LinkedList {
+class linked_list
+
+{
 private:
-	Node *head { };
-	Node *tail { };
-	int length = 0;	// let's maintain how many nodes
+    struct Node
+    {
+        int val;
+        Node* next;
+        Node(int val):val(val){ next = nullptr;};
+    };
+    Node* head;
+    Node* tail;
+    int len;
 
-	vector<Node*> debug_data;	// add/remove nodes you use
-
-	void debug_add_node(Node* node) {
-		debug_data.push_back(node);
-	}
-	void debug_remove_node(Node* node) {
-		auto it =find(debug_data.begin(), debug_data.end(), node);
-		if (it == debug_data.end())
-			cout << "Node does not exist\n";
-		else
-			debug_data.erase(it);
-	}
-
+    Node* add(int val){
+        len++;
+		auto node = new Node(val);
+        return node;
+    }
+    
+    void del(Node* node){
+        len--;
+        delete node;
+    }
+    
 public:
+    linked_list(){
+        head = tail = nullptr;
+        len = 0;
+    };
 
-	// Below 2 deletes prevent copy and assign to avoid this mistake
-	LinkedList() {
-	}
-	LinkedList(const LinkedList&) = delete;
-	LinkedList &operator=(const LinkedList &another) = delete;
-
-	void debug_print_address() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << cur << "," << cur->data << "\t";
-		cout << "\n";
-	}
-
-	void debug_print_node(Node* node, bool is_seperate = false) {
-		if (is_seperate)
-			cout << "Sep: ";
-		if (node == nullptr) {
-			cout << "nullptr\n";
-			return;
+	~linked_list() {		
+		while(head){
+			Node* nxt = head->next;
+			del(head);
+			head = nxt;
 		}
-		cout << node->data << " ";
-		if (node->next == nullptr)
-			cout << "X ";
-		else
-			cout << node->next->data << " ";
-
-		if (node == head)
-			cout << "head\n";
-		else if (node == tail)
-			cout << "tail\n";
-		else
-			cout << "\n";
 	}
-	void debug_print_list(string msg = "") {
-		if (msg != "")
-			cout << msg << "\n";
-		for (int i = 0; i < (int) debug_data.size(); ++i)
-			debug_print_node(debug_data[i]);
-		cout << "************\n"<<flush;
-	}
+   
+
+  
+
+    void insert_back(int val){
+        if(head == nullptr){
+            head = tail = add(val);
+        }
+        else{
+            tail->next = add(val);
+            tail = tail->next;
+        }
+    }
+    
+    void insert_front(int val){
+        if(head == nullptr) head = tail = add(val);
+        else{
+            auto nxt = head;
+            head = add(val);
+            head->next = nxt;
+        }
+    }
+
+    void insert(int idx , int val){
+        assert(idx >= 0 && idx <= len);
+        if(idx == len) insert_back(val);
+        else if(idx == 0) insert_front(val);
+        else{
+            for(auto cur = head ; cur ; cur = cur->next){
+                if(idx == 1){
+                    auto nxt = cur->next;
+                    cur -> next = add(val);
+                    cur -> next -> next = nxt;
+                    return; 
+                }
+                idx--;
+            }
+        }
+    }
+
+    Node* get_nth(int nth){
+        /* nth form 1 to len */
+        assert(nth > 0 && nth <= len);
+        for(auto cur = head ; cur ; cur = cur->next){
+            if(nth == 1) return cur;
+            nth--;
+        }
+        return {};
+    }
+
+    void del_first(){
+        assert(head);
+        auto node = head;
+        if(head == tail) head = tail = nullptr;
+        else head = head->next;
+        del(node);
+    }
+
+    void del_back(){
+        assert(head);
+        auto node = tail;
+        if(head == tail) head = tail = nullptr;
+        else {
+            auto cur = get_nth(len  - 1);
+            tail = cur;
+            cur -> next = nullptr;
+        }
+        del(node);
+    }
+
+    void del(int idx){
+        assert(idx >= 0 && idx < len);
+        if(idx == 0) del_first();
+        else if(idx == len-1) del_back();
+        else{
+            auto cur = get_nth(idx);
+            auto node = cur->next;
+            cur->next = cur-> next -> next;
+            del(node);
+        }
+    }
 
 
-	void debug_verify_data_integrity() {
-		if (length == 0) {
-			assert(head == nullptr);
-			assert(tail == nullptr);
-		} else {
-			assert(head != nullptr);
-			assert(tail != nullptr);
-			if (length == 1)
-				assert(head == tail);
-			else
-				assert(head != tail);
-			assert(!tail->next);
+
+    void print(){
+        for(auto cur = head ; cur ; cur = cur->next){
+            cout<<cur->val<<" ";
+        }
+        cout<<"\n";
+    }
+
+    int search(int val){
+         int idx = 0;
+         for(auto cur = head ; cur ; cur = cur->next){
+            if(val == cur->val){
+                return idx;
+            }
+            idx++;
+        }
+        return -1;
+    }
+
+	bool is_same(linked_list & list){
+		if(len != list.len) return false;
+		for(auto cur1 = head , cur2 = list.head ; cur1 ; cur1 = cur1->next , cur2 = cur2->next ){
+			if(cur1->val != cur2->val) return false;
 		}
-		int len = 0;
-		for (Node* cur = head; cur; cur = cur->next, len++)
-			assert(len < 10000);	// Consider infinite cycle?
-		assert(length == len);
-		assert(length == (int)debug_data.size());
+		return true;
 	}
 
-	////////////////////////////////////////////////////////////
+    Node* get_nth_back(int nth){
+        assert(nth >= 1 && nth <= len);
+        return get_nth(len - nth + 1);
+    }
 
-	void print() {
-		for (Node* cur = head; cur; cur = cur->next)
-			cout << "address: "<<cur<<" Data: "<<cur->data << "\n";
-		cout << "\n";
-	}
+	void reverse(){
+		if(!head || head == tail) return;
 
-	// These 2 simple functions just to not forget changing the vector and length
-	void delete_node(Node* node) {
-		debug_remove_node(node);
-		--length;
-		delete node;
-	}
+		auto prev = head;
+		auto cur = head->next;
 
-	void add_node(Node* node) {
-		debug_add_node(node);
-		++length;
-	}
-
-	void insert_end(int value) {
-		Node* item = new Node(value);
-		add_node(item);
-
-		if (!head)
-			head = tail = item;
-		else
-			tail->next = item, tail = item;
-	}
-	void insert_front(int value) {		
-		Node* item = new Node(value);
-		add_node(item);
-
-		item->next = head;
-		head = item;
-
-		if(length == 1)
-			tail = head;
-
-		debug_verify_data_integrity();
-	}
- 
-
-    void arrangeOddEven(){
-		Node* endOdd=head;
-		Node* stEven=head->next;
-		while(endOdd->next && endOdd->next->next ){
-			Node* nextEven=endOdd->next;
-			endOdd->next=endOdd->next->next;
-			nextEven->next=nextEven->next->next;
-			if(nextEven->next) tail=nextEven->next;
-			endOdd=endOdd->next;
+		while (cur)
+		{
+			auto nxt = cur->next;
+			cur->next = prev;
+			prev = cur;
+			cur = nxt;
 		}
-		endOdd->next=stEven;
-		cout<<tail<<" "<<tail->data<<"\n\n";
-			}
+
+		tail = head; tail->next = nullptr;
+		head = prev;
+		
+	}
+
+	void del_after(Node* prev){
+       
+        if(prev == nullptr) del_first();
+        else if(prev ->next == tail) del_back();
+        else{
+            auto del_node = prev->next;
+			prev->next = prev->next->next;
+			del(del_node);
+        }
+    }
+
+	void oddEven(){
+		if(!head || head == tail) return;
+		Node* odd = head;
+        Node* even = head->next;
+        while(odd->next && odd->next->next){
+            Node* nextEven = odd->next;
+            odd->next = odd->next->next;
+            nextEven->next = odd->next->next;
+            if(!nextEven->next) tail = odd->next;
+            else tail = nextEven->next; 
+            odd = odd ->next;
+        }
+       
+        odd->next = even;
+	}
+
+
 
 };
+
+
+
+
 
 void test1() {
 	cout << "\n\ntest1\n";
-	LinkedList list;
-    list.insert_end(1);
-    list.insert_end(2);
-    list.insert_end(3);
-    list.insert_end(4);
-    list.insert_end(5);
-    list.insert_end(6);
-    list.insert_end(7);
+	linked_list list;
 
-
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.insert_back(4);
+	list.oddEven();
 	list.print();
-    list.arrangeOddEven();
-    list.print();
+
+	string expected = "1 3 2 4";
+	cout<<expected<<"\n**************\n";
 }
 
+void test2() {
+	cout << "\n\ntest2\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.oddEven();
+	list.print();
+
+	string expected = "1 3 2";
+	cout<<expected<<"\n**************\n";
+}
+
+void test3() {
+	cout << "\n\ntest3\n";
+	linked_list list;
+
+	list.insert_back(1);
+	list.insert_back(2);
+	list.insert_back(3);
+	list.insert_back(4);
+	list.insert_back(5);
+	list.insert_back(6);
+	list.insert_back(7);
+	list.oddEven();
+	list.print();
+
+	string expected = "1 3 5 7 2 4 6";
+	cout<<expected<<"\n*************\n";
+}
+
+void test4() {
+	cout << "\n\ntest4\n";
+	linked_list list;
+	
+	list.insert_back(11);
+	list.insert_back(33);
+	list.insert_back(55);
+	list.insert_back(4);
+	list.insert_back(50);
+	list.insert_back(17);
+	list.insert_back(8);
+	list.oddEven();
+	list.print();
+
+	string expected = "11 55 50 8 33 4 17";
+	cout<<expected<<"\n*********\n";
+}
+
+
 int main() {
-	 test1();
+	test1();
+	 test2();
+	 test3();
+	 test4();
+
 	// must see it, otherwise RTE
 	cout << "\n\nNO RTE\n";
 
