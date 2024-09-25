@@ -1,5 +1,6 @@
 #include <iostream>
 #include <assert.h>
+#include <vector>
 using namespace std;
 
 
@@ -201,6 +202,22 @@ public:
 				cur = cur->next;
 			}
 		}
+	}
+
+    vector<Node*> reverse_range(Node* st , Node* en){
+		if(st == head) head = en;
+		if(en == tail) tail = st;
+		Node* to = en->next;
+		Node* prv = st;
+		Node* cur = st->next;
+		while(prv != en){
+			Node* nxt = cur->next;
+			cur->next = prv;
+			prv = cur;
+			cur = nxt;
+		}
+		st->next = to;
+		return { en , st };
 	}
 
 };
