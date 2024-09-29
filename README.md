@@ -1,2 +1,2 @@
-# Ds-Algo-course-solutions
-My Solutions for Dr.Mostafa Saad DSA courses 
+# DSA
+My Implementation of common Data Structures and Algorithms 
