@@ -1,1 +1,0 @@
-	int optimal = mcm(start_idx,end_id

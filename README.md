@@ -1,2 +1,2 @@
 # Ds-Algo-course-solutions
-my solutions for Dr/ Mostafa Saad course 
+My Solutions for Dr.Mostafa Saad DSA courses 
